@@ -84,8 +84,8 @@ fun nanoBot(part: Int): Int {
     var xR = pI[largestNanoRange[0]].x + pI[largestNanoRange[0]].r
     var yL = pI[largestNanoRange[0]].y - pI[largestNanoRange[0]].r
     var yR = pI[largestNanoRange[0]].y + pI[largestNanoRange[0]].r
-    var zR = pI[largestNanoRange[0]].z - pI[largestNanoRange[0]].r
-    var zL = pI[largestNanoRange[0]].z + pI[largestNanoRange[0]].r
+    var zL = pI[largestNanoRange[0]].z - pI[largestNanoRange[0]].r
+    var zR = pI[largestNanoRange[0]].z + pI[largestNanoRange[0]].r
     
     largestNanoRange.forEach {
         if (pI[it].x - pI[it].r > xL) xL = pI[it].x - pI[it].r
@@ -99,6 +99,7 @@ fun nanoBot(part: Int): Int {
     println("$xL..$xR")
     println("$yL..$yR")
     println("$zL..$zR")
+    println((xR-xL) * (yR-yL) * (zR-zL))
 
     return result
 }
