@@ -12,13 +12,13 @@ fun nanoBot(part: Int): Int {
     // #2 find nanobots with largest signal radius
 
     var id = 0
-    var largestRange = 0
+    var largestRange = 0L
     var idLargestRange = 0
 	  File("day1823_puzzle_input.txt").forEachLine {
-        val x = it.substringAfter("<").substringBefore(">").split(",")[0].toInt()
-        val y = it.substringAfter("<").substringBefore(">").split(",")[1].toInt()
-        val z = it.substringAfter("<").substringBefore(">").split(",")[2].toInt()
-        val r = it.substringAfter("r=").toInt()
+        val x = it.substringAfter("<").substringBefore(">").split(",")[0].toLong()
+        val y = it.substringAfter("<").substringBefore(">").split(",")[1].toLong()
+        val z = it.substringAfter("<").substringBefore(">").split(",")[2].toLong()
+        val r = it.substringAfter("r=").toLong()
         if (r > largestRange) {
             largestRange = r
             idLargestRange = id
@@ -87,6 +87,7 @@ fun nanoBot(part: Int): Int {
     var zL = pI[largestNanoRange[0]].z - pI[largestNanoRange[0]].r
     var zR = pI[largestNanoRange[0]].z + pI[largestNanoRange[0]].r
     
+
     largestNanoRange.forEach {
         if (pI[it].x - pI[it].r > xL) xL = pI[it].x - pI[it].r
         if (pI[it].x + pI[it].r < xR) xR = pI[it].x + pI[it].r
@@ -99,7 +100,8 @@ fun nanoBot(part: Int): Int {
     println("$xL..$xR")
     println("$yL..$yR")
     println("$zL..$zR")
-    println((xR-xL) * (yR-yL) * (zR-zL))
+    println((xR-xL) * (yR-yL) * (zR-zL))   
+    // this is a way to large area to search for
 
     return result
 }
@@ -122,8 +124,8 @@ fun main() {
 
 data class NanoBot(
     var id: Int,
-    var x: Int,
-    var y: Int,
-    var z: Int,
-    var r: Int
+    var x: Long,
+    var y: Long,
+    var z: Long,
+    var r: Long
 )
