@@ -77,11 +77,28 @@ fun nanoBot(part: Int): Int {
             largestNanoRange.addAll(it)
         }
     }
-    println(largestNanoRange.size)
+    //println(largestNanoRange)
 
     // #5 identify shortest point to 0,0,0 in highest cluster
-    // ok now, how to do this?
+    var xL = pI[largestNanoRange[0]].x - pI[largestNanoRange[0]].r
+    var xR = pI[largestNanoRange[0]].x + pI[largestNanoRange[0]].r
+    var yL = pI[largestNanoRange[0]].y - pI[largestNanoRange[0]].r
+    var yR = pI[largestNanoRange[0]].y + pI[largestNanoRange[0]].r
+    var zR = pI[largestNanoRange[0]].z - pI[largestNanoRange[0]].r
+    var zL = pI[largestNanoRange[0]].z + pI[largestNanoRange[0]].r
+    
+    largestNanoRange.forEach {
+        if (pI[it].x - pI[it].r > xL) xL = pI[it].x - pI[it].r
+        if (pI[it].x + pI[it].r < xR) xR = pI[it].x + pI[it].r
+        if (pI[it].y - pI[it].r > yL) yL = pI[it].y - pI[it].r
+        if (pI[it].y + pI[it].r < yR) yR = pI[it].y + pI[it].r
+        if (pI[it].z - pI[it].r > zL) zL = pI[it].z - pI[it].r
+        if (pI[it].z + pI[it].r < zR) zR = pI[it].z + pI[it].r
+    }
 
+    println("$xL..$xR")
+    println("$yL..$yR")
+    println("$zL..$zR")
 
     return result
 }
