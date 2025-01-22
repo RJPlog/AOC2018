@@ -27,7 +27,7 @@ fun nanoBot(part: Int): Int {
         id+=1
 	}
 
-    // #3 cont nanobots in range of nanobot with largest range
+    // #3 count nanobots in range of nanobot with largest range
     if (part == 1) {
         var nanoBotLargestRange = pI[idLargestRange]
         pI.forEach {
@@ -37,7 +37,52 @@ fun nanoBot(part: Int): Int {
     } 
     
     // part 2
-    
+    // #4 find clusters
+    var clusters = mutableListOf<MutableList<Int>>()
+    for (i in 0..pI.size-1) {
+        clusters.add(mutableListOf(i))  
+    }
+
+    for (i in 0..0) {  // do while clusters are not changed any more - is this really needed?
+        clusters.forEach {
+            var currentCluster = it
+            pI.forEach {
+                var newElementFound = true
+                val currCompNano = it
+                if (!currentCluster.contains(it.id)) {
+                    currentCluster.forEach {
+                        val currClusterNano = pI[it]
+                        if (abs(currCompNano.x - currClusterNano.x) + abs(currCompNano.y - currClusterNano.y) + abs(currCompNano.z - currClusterNano.z) > (currCompNano.r + currClusterNano.r)) {
+                            newElementFound = false
+                        }
+                    }
+                } else {
+                    newElementFound = false
+                }
+                if (newElementFound) currentCluster.add(currCompNano.id)
+            }
+        }
+    } // do while clusters are not changed any more
+
+    // sort out dublicates and get largest Nano range
+    for (i in 0..clusters.size-1) {
+        clusters[i].sort()
+    }
+    clusters = clusters.distinct().toMutableList()
+
+    var largestNanoRange = mutableListOf<Int>()
+    clusters.forEach {
+        if (it.size > largestNanoRange.size) {
+            largestNanoRange.clear()
+            largestNanoRange.addAll(it)
+        }
+    }
+    println(largestNanoRange.size)
+
+    // #5 identify shortest point to 0,0,0 in highest cluster
+    // ok now, how to do this?
+
+
     return result
 }
 
