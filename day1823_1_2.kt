@@ -77,31 +77,53 @@ fun nanoBot(part: Int): Int {
             largestNanoRange.addAll(it)
         }
     }
-    //println(largestNanoRange)
+    println(largestNanoRange)
+ 
+    // #5 identify intersection of all nanobots. 
 
+    // #5.1 initialize intersection with corners of first bot in nano range set
     // #5 identify shortest point to 0,0,0 in highest cluster
-    var xL = pI[largestNanoRange[0]].x - pI[largestNanoRange[0]].r
-    var xR = pI[largestNanoRange[0]].x + pI[largestNanoRange[0]].r
-    var yL = pI[largestNanoRange[0]].y - pI[largestNanoRange[0]].r
-    var yR = pI[largestNanoRange[0]].y + pI[largestNanoRange[0]].r
-    var zL = pI[largestNanoRange[0]].z - pI[largestNanoRange[0]].r
-    var zR = pI[largestNanoRange[0]].z + pI[largestNanoRange[0]].r
+    var x1 = pI[largestNanoRange[0]].x
+    var y1 = pI[largestNanoRange[0]].y
+    var z1 = pI[largestNanoRange[0]].z
+    var r1 = pI[largestNanoRange[0]].r
+    var A = Triple(x1, y1, z1 + r1)
+    var B = Triple(x1, y1, z1 - r1)
+    var C = Triple(x1, y1 + r1, z1)
+    var D = Triple(x1, y1 - r1, z1)
+    var E = Triple(x1 + r1, y1, z1)
+    var F = Triple(x1 - r1, y1, z1)
+    var intersection = mutableListOf(A, B, C, D, E, F)
+    var intersectionNew = mutableListOf<Triple<Int, Int, Int>>()
+    
+    for (i in 1..largestNanoRange.size-1) {
+        println(intersection)
+        // check if corners (coordinates of intersection) are in range of largestNanoRange[i]
+        // if true, add corner to newIntersection, else put corner of conterpart into intersection New
+
+        // check corner A (if A is in, put it into intersectionNew, )
+
+        // check corner B
+
+        // ...
+
+        // guess I have to rethink this completely
+
+        intersection.forEach {
+            if (abs(it.x - largestNanoRange[i].x) + abs(it.y - largestNanoRange[i].y) + abs(it.z - largestNanoRange[i].z) <= largestNanoRange[i].z) {
+                intersectionNew.add(it)
+            }
+        }
+
+        // ?? who to check if corner of next nano robot is in given rectangle???
     
 
-    largestNanoRange.forEach {
-        if (pI[it].x - pI[it].r > xL) xL = pI[it].x - pI[it].r
-        if (pI[it].x + pI[it].r < xR) xR = pI[it].x + pI[it].r
-        if (pI[it].y - pI[it].r > yL) yL = pI[it].y - pI[it].r
-        if (pI[it].y + pI[it].r < yR) yR = pI[it].y + pI[it].r
-        if (pI[it].z - pI[it].r > zL) zL = pI[it].z - pI[it].r
-        if (pI[it].z + pI[it].r < zR) zR = pI[it].z + pI[it].r
+        // check if corners of largestNanoRange[i] are in range of intersection
+        // if true, add corner to newIntersection
+
+        // swap intersection/intersectionNew
     }
 
-    println("$xL..$xR")
-    println("$yL..$yR")
-    println("$zL..$zR")
-    println((xR-xL) * (yR-yL) * (zR-zL))   
-    // this is a way to large area to search for
 
     return result
 }
@@ -129,3 +151,4 @@ data class NanoBot(
     var z: Long,
     var r: Long
 )
+
