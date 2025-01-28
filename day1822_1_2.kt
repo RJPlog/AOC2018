@@ -1,16 +1,12 @@
 // sudo apt-get update && sudo apt-get install kotlin
 // kotlinc day1822_1_2.kt -include-runtime -d day1822_1_2.jar && java -jar day1822_1_2.jar
 
-
 // 0: . = rocky  -> torch or climbing (12)
 // 1: = = wet	   -> climbing or nothing (20)
 // 2: |  = narrow -> torch or nothing (10)
 
-
-// since I do not decide on which tool I equip, it goes straigt trough some regions because both could be true
-// need to find a way to calculate way with both tools!!! node and node*?
-
 import java.io.File
+import kotlin.math.*
  
 fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part: Int): Int {
       
@@ -23,14 +19,14 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     println("puzzleInput: ${puzzleInput.length}")
     for (i in 1..puzzleInput.length-1) {
             if (puzzleInput[i] == '0') {
-                Q.put(Pair(i,1), listOf(w*h*1000000, 0, 4))
-                Q.put(Pair(i,2), listOf(w*h*1000000, 0, 4))            
+                Q.put(Pair(i,1), listOf(w*h*100, 0, 4))
+                Q.put(Pair(i,2), listOf(w*h*100, 0, 4))            
             } else if  (puzzleInput[i] == '1') {
-                Q.put(Pair(i,0), listOf(w*h*1000000, 0, 4))
-                Q.put(Pair(i,2), listOf(w*h*1000000, 0, 4))            
+                Q.put(Pair(i,0), listOf(w*h*100, 0, 4))
+                Q.put(Pair(i,2), listOf(w*h*100, 0, 4))            
             }  else if (puzzleInput[i] == '2') {
-                Q.put(Pair(i,0), listOf(w*h*1000000, 0, 4))
-                Q.put(Pair(i,1), listOf(w*h*1000000, 0, 4))            
+                Q.put(Pair(i,0), listOf(w*h*100, 0, 4))
+                Q.put(Pair(i,1), listOf(w*h*100, 0, 4))            
             } 
         }
     Q.put(Pair(startIndex,t), listOf(0,0,t))
@@ -42,12 +38,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     //println(Q)
     
     var j = 0
-    
-    
-    // wie kommt das zustande?
-
-    // check for (1, 2)???  {(0, 1)=[0, 0, 1], (1, 0)=[1, 0, 0], (1, 2)=[1, 0, 2]}
-    
     while (!allNodes.containsKey(Pair(endIndex, t)))  {   // ends when destination is reached
         // take node with shortest distance
         var idU = Pair(0,4)
@@ -64,21 +54,17 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         }
         allNodes.put(idU, listOf(distU,prevU,toolU))
 
-        print("$j check for $idU, ${Q.getValue(idU)}")
+        //print("$j check for $idU, ${Q.getValue(idU)}")
         Q.remove(idU)
         //println(allNodes)
-
-
         
         // for each neigbour of U
         var xU = idU.first % w
         var yU = idU.first / w
 
-        println("     (x,y) $xU, $yU, ")
-
-        // ---------------------------------------------------------------------------
-        // extend to consider incomming tool?
-        // ---------------------------------------------------------------------------
+        //println("     (x,y) $xU, $yU, ")
+        //if (xU +1 >= w-1) println("WARNING: w to small")
+        if (yU +1 >= h-1) println("WARNING: h to small")
 
         // tile up 
         if (Q.containsKey(Pair((xU) + w * (yU-1),1)) && yU >0) {
@@ -230,7 +216,9 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         j += 1
     }    
     
-
+    // --------------------------------------------------------------
+    // next step: Check for example, why path cannot be reconstructed
+    // --------------------------------------------------------------
     
     /* 
     var currNode = Pair(endIndex, t)
@@ -244,7 +232,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         println("$currNode: ${allNodes.getValue(currNode)}")
     */    
     
-    
     println()
     //println(allNodes)
 
@@ -257,7 +244,7 @@ fun main() {
     println("--- Day 22: Mode Maze ---")
 	
     var puzzleInput = mutableListOf("510", "10,10")
-     puzzleInput = mutableListOf("5913", "8,701")
+    puzzleInput = mutableListOf("5913", "8,701")
 
     // prepare cave plan
     val d = puzzleInput[0].toInt()
@@ -283,9 +270,12 @@ fun main() {
     var solution1 = pI.sum()
     println("   part1: the total risk level for the smallest rectangle is $solution1")
 
-    // part 2
-    w += 20
-    h += 20
+    // ---------------------
+    //           part 2
+    // ---------------------
+    
+    w += 40 // 20
+    h += 15   // 20
     
     pIELev.clear()
     for (y in 0..h-1) {
@@ -304,20 +294,14 @@ fun main() {
 
     var pIPart2 = (pIELev.map {(it % 3)}).joinToString("")
 
-    
-
-    
-
     var startIndex = 0
     var endIndex = puzzleInput[1].split(",")[0].toInt() + w * puzzleInput[1].split(",")[1].toInt() 
     println("endIndex: $endIndex")
     var tool = 1
         
     var solution2 = maze(pIPart2, w, h, startIndex, endIndex, tool, 2)
-    println("   part2: the fewest number of minutes you can take is $solution2")
-
+    println("   part2: the fewest number of minutes you can take is $solution2") // 977 to high 972 to low
     println("$w, $h")
-
 
     t1 = System.currentTimeMillis() - t1
 	println("puzzle solved in ${t1} ms")
