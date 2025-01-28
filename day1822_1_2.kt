@@ -199,7 +199,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
     }    
         
     // use this to determine path  / debugging:
-    if (true) {
+    if (false) {
         var pathContent = mutableMapOf<Pair<Int,Int>,List<Int>>()
         var currNode = Pair(endIndex, t)
 
@@ -288,12 +288,15 @@ fun main() {
             }
         }
     }
+    // pIELev[puzzleInput[1].split(",")[0].toInt() + w * puzzleInput[1].split(",")[1].toInt()] = 0
 
     println("ccc")
-    println(pIELev[0])
-    println(pIELev[1])
-    println(pIELev[49])
-    println(pIELev[50])
+    var xx = 4
+    var yy = 701
+    println(pIELev[(xx + w*yy)])
+    println(pIELev[(xx+1 + w*yy)])
+    println(pIELev[(xx+2 + w*yy)])
+    println(pIELev[(xx+3 + w*yy)])
     println("ccc")
     var pIPart2 = (pIELev.map {(it % 3)}).joinToString("")
 
