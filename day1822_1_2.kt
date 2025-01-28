@@ -20,6 +20,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     var startIndex = start
     var endIndex = end
 
+    println("puzzleInput: ${puzzleInput.length}")
     for (i in 1..puzzleInput.length-1) {
             if (puzzleInput[i] == '0') {
                 Q.put(Pair(i,1), listOf(w*h*1000000, 0, 4))
@@ -36,6 +37,8 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     Q.remove(Pair(endIndex,2))   
     Q.remove(Pair(endIndex,0))
 
+
+    println("startIndex $startIndex, t $t, ${Q.getValue(Pair(startIndex, t))}")
     //println(Q)
     
     var j = 0
@@ -48,7 +51,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     while (!allNodes.containsKey(Pair(endIndex, t)))  {   // ends when destination is reached
         // take node with shortest distance
         var idU = Pair(0,4)
-        var distU = w*h*1000000
+        var distU = w*h*100
         var prevU = 0
         var toolU = 4
         for ((key, value) in Q) {
@@ -61,7 +64,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         }
         allNodes.put(idU, listOf(distU,prevU,toolU))
 
-        //println("$j: check for $idU, ${Q.getValue(idU)}")
+        print("$j check for $idU, ${Q.getValue(idU)}")
         Q.remove(idU)
         //println(allNodes)
 
@@ -70,6 +73,8 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         // for each neigbour of U
         var xU = idU.first % w
         var yU = idU.first / w
+
+        println("     (x,y) $xU, $yU, ")
 
         // ---------------------------------------------------------------------------
         // extend to consider incomming tool?
@@ -190,7 +195,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     // tile left
     if (Q.containsKey(Pair((xU-1) + w * (yU),1)) && xU >0) {
         var distance = distU
-        var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
         if (toolU == 1) {
             distance += 1
         } else {
@@ -202,7 +206,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     }         
     if (Q.containsKey(Pair((xU-1) + w * (yU),2)) && xU > 0) {
         var distance = distU
-        var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
         if (toolU == 2) {
             distance += 1
         } else {
@@ -214,7 +217,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     } 
     if (Q.containsKey(Pair((xU-1) + w * (yU),0)) && xU >0) {
         var distance = distU
-        var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
         if (toolU == 0) {
             distance += 1
         } else {
@@ -225,17 +227,12 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         }
     } 
          
-
-    //println()
-    //println("Q: $Q")
-    //println("allNodes: $allNodes")
         j += 1
-        //println("j: $j")
     }    
     
 
     
-     
+    /* 
     var currNode = Pair(endIndex, t)
     var i = 0
     println(" for debugging: current path:")
@@ -245,9 +242,10 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
                 currNode = Pair(allNodes.getValue(currNode)[1],allNodes.getValue(currNode)[2])    
         }
         println("$currNode: ${allNodes.getValue(currNode)}")
+    */    
     
     
-    //println()
+    println()
     //println(allNodes)
 
     return allNodes.getValue(Pair(endIndex,1))[0]
@@ -259,7 +257,7 @@ fun main() {
     println("--- Day 22: Mode Maze ---")
 	
     var puzzleInput = mutableListOf("510", "10,10")
-    // puzzleInput = mutableListOf("XXXX", "XXXX")
+     puzzleInput = mutableListOf("5913", "8,701")
 
     // prepare cave plan
     val d = puzzleInput[0].toInt()
@@ -286,8 +284,8 @@ fun main() {
     println("   part1: the total risk level for the smallest rectangle is $solution1")
 
     // part 2
-    w = 16
-    h = 16
+    w += 20
+    h += 20
     
     pIELev.clear()
     for (y in 0..h-1) {
@@ -312,11 +310,13 @@ fun main() {
 
     var startIndex = 0
     var endIndex = puzzleInput[1].split(",")[0].toInt() + w * puzzleInput[1].split(",")[1].toInt() 
-    println(endIndex)
+    println("endIndex: $endIndex")
     var tool = 1
         
     var solution2 = maze(pIPart2, w, h, startIndex, endIndex, tool, 2)
     println("   part2: the fewest number of minutes you can take is $solution2")
+
+    println("$w, $h")
 
 
     t1 = System.currentTimeMillis() - t1
