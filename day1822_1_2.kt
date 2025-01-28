@@ -8,7 +8,7 @@
 import java.io.File
 import kotlin.math.*
  
-fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part: Int): Int {
+fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int {
       
     // initialize all necessary variables for Dijkstra
     var Q = mutableMapOf<Pair<Int,Int>,List<Int>>()  // id -> dist, previous, prevtool (0 = neither, 1 = torch, 2 = climbing gear)
@@ -19,52 +19,42 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     println("puzzleInput: ${puzzleInput.length}")
     for (i in 1..puzzleInput.length-1) {
             if (puzzleInput[i] == '0') {
-                Q.put(Pair(i,1), listOf(w*h*100, 0, 4))
-                Q.put(Pair(i,2), listOf(w*h*100, 0, 4))            
+                Q.put(Pair(i,1), listOf(w*h*100, 0, 1))
+                Q.put(Pair(i,2), listOf(w*h*100, 0, 2))            
             } else if  (puzzleInput[i] == '1') {
-                Q.put(Pair(i,0), listOf(w*h*100, 0, 4))
-                Q.put(Pair(i,2), listOf(w*h*100, 0, 4))            
+                Q.put(Pair(i,0), listOf(w*h*100, 0, 0))
+                Q.put(Pair(i,2), listOf(w*h*100, 0, 2))            
             }  else if (puzzleInput[i] == '2') {
-                Q.put(Pair(i,0), listOf(w*h*100, 0, 4))
-                Q.put(Pair(i,1), listOf(w*h*100, 0, 4))            
+                Q.put(Pair(i,0), listOf(w*h*100, 0, 0))
+                Q.put(Pair(i,1), listOf(w*h*100, 0, 1))            
             } 
         }
     Q.put(Pair(startIndex,t), listOf(0,0,t))
     Q.remove(Pair(endIndex,2))   
     Q.remove(Pair(endIndex,0))
 
-
     println("startIndex $startIndex, t $t, ${Q.getValue(Pair(startIndex, t))}")
-    //println(Q)
     
     var j = 0
     while (!allNodes.containsKey(Pair(endIndex, t)))  {   // ends when destination is reached
         // take node with shortest distance
         var idU = Pair(0,4)
         var distU = w*h*100
-        var prevU = 0
         var toolU = 4
         for ((key, value) in Q) {
-            if (value[0] < distU) {
+            if (value[0] <= distU) {
                 idU = key
                 distU = value[0]
-                prevU = value[1]
                 toolU = key.second
             }
         }
-        allNodes.put(idU, listOf(distU,prevU,toolU))
+        allNodes.put(idU, Q.getValue(idU))
 
-        //print("$j check for $idU, ${Q.getValue(idU)}")
         Q.remove(idU)
-        //println(allNodes)
         
         // for each neigbour of U
         var xU = idU.first % w
         var yU = idU.first / w
-
-        //println("     (x,y) $xU, $yU, ")
-        //if (xU +1 >= w-1) println("WARNING: w to small")
-        if (yU +1 >= h-1) println("WARNING: h to small")
 
         // tile up 
         if (Q.containsKey(Pair((xU) + w * (yU-1),1)) && yU >0) {
@@ -104,7 +94,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         // tile right
         if (Q.containsKey(Pair((xU+1) + w * (yU),1)) && xU < w -1) {
             var distance = distU
-            var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
             if (toolU == 1) {
                 distance += 1
             } else {
@@ -116,7 +105,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         }         
         if (Q.containsKey(Pair((xU+1) + w * (yU),2)) && xU < w -1) {
             var distance = distU
-            var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
             if (toolU == 2) {
                 distance += 1
             } else {
@@ -128,7 +116,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         } 
         if (Q.containsKey(Pair((xU+1) + w * (yU),0)) && xU < w -1) {
             var distance = distU
-            var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
             if (toolU == 0) {
                 distance += 1
             } else {
@@ -142,7 +129,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         // tile down
         if (Q.containsKey(Pair((xU) + w * (yU+1),1)) && yU < h-1) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
             if (toolU == 1) {
                 distance += 1
             } else {
@@ -154,7 +140,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         }         
         if (Q.containsKey(Pair((xU) + w * (yU+1),2)) && yU < h-1) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
             if (toolU == 2) {
                 distance += 1
             } else {
@@ -166,7 +151,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         } 
         if (Q.containsKey(Pair((xU) + w * (yU+1),0)) && yU < h-1) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
             if (toolU == 0) {
                 distance += 1
             } else {
@@ -177,64 +161,77 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
             } 
         } 
         
-        
-    // tile left
-    if (Q.containsKey(Pair((xU-1) + w * (yU),1)) && xU >0) {
-        var distance = distU
-        if (toolU == 1) {
-            distance += 1
-        } else {
-            distance += 8
-        }
-        if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
-            Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, toolU))
+        // tile left
+        if (Q.containsKey(Pair((xU-1) + w * (yU),1)) && xU >0) {
+            var distance = distU
+            if (toolU == 1) {
+                distance += 1
+            } else {
+                distance += 8
+            }
+            if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
+                Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, toolU))
+            } 
+        }         
+        if (Q.containsKey(Pair((xU-1) + w * (yU),2)) && xU > 0) {
+            var distance = distU
+            if (toolU == 2) {
+                distance += 1
+            } else {
+                distance += 8
+            } 
+            if (distance < Q.getValue(Pair((xU-1) + w * (yU),2))[0]) {
+                Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, toolU))
+            }
         } 
-    }         
-    if (Q.containsKey(Pair((xU-1) + w * (yU),2)) && xU > 0) {
-        var distance = distU
-        if (toolU == 2) {
-            distance += 1
-        } else {
-            distance += 8
+        if (Q.containsKey(Pair((xU-1) + w * (yU),0)) && xU >0) {
+            var distance = distU
+            if (toolU == 0) {
+                distance += 1
+            } else {
+                distance += 8
+            } 
+            if (distance < Q.getValue(Pair((xU-1) + w * (yU),0))[0]) {
+                Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, toolU))
+            }
         } 
-        if (distance < Q.getValue(Pair((xU-1) + w * (yU),2))[0]) {
-            Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, toolU))
-        }
-    } 
-    if (Q.containsKey(Pair((xU-1) + w * (yU),0)) && xU >0) {
-        var distance = distU
-        if (toolU == 0) {
-            distance += 1
-        } else {
-            distance += 8
-        } 
-        if (distance < Q.getValue(Pair((xU-1) + w * (yU),0))[0]) {
-            Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, toolU))
-        }
-    } 
-         
         j += 1
     }    
-    
-    // --------------------------------------------------------------
-    // next step: Check for example, why path cannot be reconstructed
-    // --------------------------------------------------------------
-    
-    /* 
-    var currNode = Pair(endIndex, t)
-    var i = 0
-    println(" for debugging: current path:")
-    while (currNode != Pair(0,t)) {
-        i+= 1
-                println("$currNode: ${allNodes.getValue(currNode)}")
-                currNode = Pair(allNodes.getValue(currNode)[1],allNodes.getValue(currNode)[2])    
-        }
-        println("$currNode: ${allNodes.getValue(currNode)}")
-    */    
-    
-    println()
-    //println(allNodes)
+        
+    // use this to determine path  / debugging:
+    if (true) {
+        var pathContent = mutableMapOf<Pair<Int,Int>,List<Int>>()
+        var currNode = Pair(endIndex, t)
 
+        pathContent.put(currNode, allNodes.getValue(currNode))
+        var i = 0
+        println(" for debugging: current path:")
+        while (currNode != Pair(0,t)) {
+            i+= 1
+                    println("$currNode: ${allNodes.getValue(currNode)}")
+                    currNode = Pair(allNodes.getValue(currNode)[1],allNodes.getValue(currNode)[2]) 
+                    pathContent.put(currNode, allNodes.getValue(currNode))   
+            }
+            println("$currNode: ${allNodes.getValue(currNode)}") 
+
+        println(pathContent.size)
+
+        for (y in 0..h-1) {
+            for (x in 0..w-1) {
+                if (pathContent.containsKey(Pair(x + w*y, 0))) {
+                    print("N,")
+                } else if (pathContent.containsKey(Pair(x + w*y, 1))) {
+                    print("T,")
+                } else if (pathContent.containsKey(Pair(x + w*y, 2))) {
+                    print("C,")
+                } else {
+                    print("${puzzleInput[x + w*y]},")
+                }
+            }
+            println()
+        }
+    }
+    
     return allNodes.getValue(Pair(endIndex,1))[0]
 }
 
@@ -254,7 +251,7 @@ fun main() {
     var pIELev = mutableListOf<Int>()
     for (y in 0..h-1) {
         for (x in 0..w-1) {
-            if (x == 0 && y == 0  || x == w-1 && y == h-1) {
+            if ((x == 0 && y == 0)  || (x == w-1 && y == h-1)) {
                 pIELev.add((0 + d) % 20183)
             } else if (y == 0 ) {
                 pIELev.add(((x*16807) + d) % 20183)
@@ -273,14 +270,14 @@ fun main() {
     // ---------------------
     //           part 2
     // ---------------------
-    
-    w += 40 // 20
-    h += 15   // 20
+
+    w += 40 // 40 for puzzleInput  // 5 for example
+    h += 15 // 15 for puzzleInput // 12 for example
     
     pIELev.clear()
     for (y in 0..h-1) {
         for (x in 0..w-1) {
-            if (x == 0 && y == 0  || x == puzzleInput[1].split(",")[0].toInt() && y == puzzleInput[1].split(",")[1].toInt()) {
+            if ((x == 0 && y == 0)  || (x == puzzleInput[1].split(",")[0].toInt() && y == puzzleInput[1].split(",")[1].toInt())) {
                 pIELev.add((0 + d) % 20183)
             } else if (y == 0 ) {
                 pIELev.add(((x*16807) + d) % 20183)
@@ -292,14 +289,24 @@ fun main() {
         }
     }
 
+    println("ccc")
+    println(pIELev[0])
+    println(pIELev[1])
+    println(pIELev[49])
+    println(pIELev[50])
+    println("ccc")
     var pIPart2 = (pIELev.map {(it % 3)}).joinToString("")
+
+    //pIPart2.chunked(w) {
+    //    println(it)
+    //}
 
     var startIndex = 0
     var endIndex = puzzleInput[1].split(",")[0].toInt() + w * puzzleInput[1].split(",")[1].toInt() 
     println("endIndex: $endIndex")
     var tool = 1
         
-    var solution2 = maze(pIPart2, w, h, startIndex, endIndex, tool, 2)
+    var solution2 = maze(pIPart2, w, h, startIndex, endIndex, tool)
     println("   part2: the fewest number of minutes you can take is $solution2") // 977 to high 972 to low
     println("$w, $h")
 
