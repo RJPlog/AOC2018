@@ -15,25 +15,28 @@ import java.io.File
 fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part: Int): Int {
       
     // initialize all necessary variables for Dijkstra
-    var Q = mutableMapOf<Pair<Int,Int>,List<Int>>()  // id -> dist, previous, tool (0 = neither, 1 = torch, 2 = climbing gear)
+    var Q = mutableMapOf<Pair<Int,Int>,List<Int>>()  // id -> dist, previous, prevtool (0 = neither, 1 = torch, 2 = climbing gear)
     var allNodes = mutableMapOf<Pair<Int,Int>,List<Int>>()
     var startIndex = start
     var endIndex = end
 
     for (i in 1..puzzleInput.length-1) {
-            var node = listOf(w*h*1000000, 0, 0 )
             if (puzzleInput[i] == '0') {
-                Q.put(Pair(i,1), node)
-                Q.put(Pair(i,2), node)            
+                Q.put(Pair(i,1), listOf(w*h*1000000, 0, 4))
+                Q.put(Pair(i,2), listOf(w*h*1000000, 0, 4))            
             } else if  (puzzleInput[i] == '1') {
-                Q.put(Pair(i,0), node)
-                Q.put(Pair(i,2), node)            
+                Q.put(Pair(i,0), listOf(w*h*1000000, 0, 4))
+                Q.put(Pair(i,2), listOf(w*h*1000000, 0, 4))            
             }  else if (puzzleInput[i] == '2') {
-                Q.put(Pair(i,0), node)
-                Q.put(Pair(i,1), node)            
+                Q.put(Pair(i,0), listOf(w*h*1000000, 0, 4))
+                Q.put(Pair(i,1), listOf(w*h*1000000, 0, 4))            
             } 
         }
     Q.put(Pair(startIndex,t), listOf(0,0,t))
+    Q.remove(Pair(endIndex,2))   
+    Q.remove(Pair(endIndex,0))
+
+    //println(Q)
     
     var j = 0
     
@@ -42,7 +45,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
 
     // check for (1, 2)???  {(0, 1)=[0, 0, 1], (1, 0)=[1, 0, 0], (1, 2)=[1, 0, 2]}
     
-    while (j < 3 && !(allNodes.contains(Pair(endIndex,0)) || allNodes.contains(Pair(endIndex,1))) || allNodes.contains(Pair(endIndex,2)))  {   // ends when destination is reached
+    while (!allNodes.containsKey(Pair(endIndex, t)))  {   // ends when destination is reached
         // take node with shortest distance
         var idU = Pair(0,4)
         var distU = w*h*1000000
@@ -53,13 +56,14 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
                 idU = key
                 distU = value[0]
                 prevU = value[1]
-                toolU = value[2]
+                toolU = key.second
             }
         }
         allNodes.put(idU, listOf(distU,prevU,toolU))
+
+        //println("$j: check for $idU, ${Q.getValue(idU)}")
         Q.remove(idU)
-        println("check for $idU")
-        println(allNodes)
+        //println(allNodes)
 
 
         
@@ -74,168 +78,111 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
         // tile up 
         if (Q.containsKey(Pair((xU) + w * (yU-1),1)) && yU >0) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU-1)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 2) {
+            if (toolU == 1) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),1), listOf(distance, idU.first, 1))
-                }
-            } else if (region == 1) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU) + w * (yU-1),2), listOf(distance, idU.first, 2))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU) + w * (yU-1),1))[0]) {
+                Q.put(Pair((xU) + w * (yU-1),1), listOf(distance, idU.first, toolU))
+            }
         }         
         if (Q.containsKey(Pair((xU) + w * (yU-1),2)) && yU >0) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU-1)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 1) {
+            if (toolU == 2) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),2))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),2), listOf(distance, idU.first, 2))
-                }
-            } else if (region == 2) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),2))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU) + w * (yU-1),1), listOf(distance, idU.first, 1))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU) + w * (yU-1),2))[0]) {
+                Q.put(Pair((xU) + w * (yU-1),2), listOf(distance, idU.first, toolU))
+            }
         } 
         if (Q.containsKey(Pair((xU) + w * (yU-1),0)) && yU >0) {
             var distance = distU
-            var region = puzzleInput[(xU) + w * (yU-1)].toString().toInt()
-            var tool = 0
-            if (region == 1 || region == 2) {
+            if (toolU == 0) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),0))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),0), listOf(distance, idU.first, 0))
-                }
-            } else if (region == 0) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU-1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU-1),1), listOf(distance, idU.first, 1))
-                    Q.put(Pair((xU) + w * (yU-1),2), listOf(distance, idU.first, 2))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU) + w * (yU-1),0))[0]) {
+                Q.put(Pair((xU) + w * (yU-1),0), listOf(distance, idU.first, toolU))
+            }
         } 
 
         // tile right
         if (Q.containsKey(Pair((xU+1) + w * (yU),1)) && xU < w -1) {
             var distance = distU
             var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 2) {
+            if (toolU == 1) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),1))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),1), listOf(distance, idU.first, 1))
-                }
-            } else if (region == 1) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),1))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU+1) + w * (yU),2), listOf(distance, idU.first, 2))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU+1) + w * (yU),1))[0]) {
+                Q.put(Pair((xU+1) + w * (yU),1), listOf(distance, idU.first, toolU))
+            }
         }         
         if (Q.containsKey(Pair((xU+1) + w * (yU),2)) && xU < w -1) {
             var distance = distU
             var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 1) {
+            if (toolU == 2) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),2))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),2), listOf(distance, idU.first, 2))
-                }
-            } else if (region == 2) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),2))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU+1) + w * (yU),1), listOf(distance, idU.first, 1))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU+1) + w * (yU),2))[0]) {
+                Q.put(Pair((xU+1) + w * (yU),2), listOf(distance, idU.first, toolU))
+            }
         } 
         if (Q.containsKey(Pair((xU+1) + w * (yU),0)) && xU < w -1) {
             var distance = distU
             var region = puzzleInput[(xU+1) + w * (yU)].toString().toInt()
-            var tool = 0
-            if (region == 1 || region == 2) {
+            if (toolU == 0) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),0))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),0), listOf(distance, idU.first, 0))
-                }
-            } else if (region == 0) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU+1) + w * (yU),1))[0]) {
-                    Q.put(Pair((xU+1) + w * (yU),1), listOf(distance, idU.first, 1))
-                    Q.put(Pair((xU+1) + w * (yU),2), listOf(distance, idU.first, 2))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU+1) + w * (yU),0))[0]) {
+                Q.put(Pair((xU+1) + w * (yU),0), listOf(distance, idU.first, toolU))
+            }
         } 
 
         // tile down
         if (Q.containsKey(Pair((xU) + w * (yU+1),1)) && yU < h-1) {
             var distance = distU
             var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 2) {
+            if (toolU == 1) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),1), listOf(distance, idU.first, 1))
-                }
-            } else if (region == 1) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU) + w * (yU+1),2), listOf(distance, idU.first, 2))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU) + w * (yU+1),1))[0]) {
+                Q.put(Pair((xU) + w * (yU+1),1), listOf(distance, idU.first, toolU))
+            }
         }         
         if (Q.containsKey(Pair((xU) + w * (yU+1),2)) && yU < h-1) {
             var distance = distU
             var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
-            var tool = 0
-            if (region == 0 || region == 1) {
+            if (toolU == 2) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),2))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),2), listOf(distance, idU.first, 2))
-                }
-            } else if (region == 2) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),2))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),0), listOf(distance, idU.first, 0))
-                    Q.put(Pair((xU) + w * (yU+1),1), listOf(distance, idU.first, 1))
-                }
             } 
+            if (distance < Q.getValue(Pair((xU) + w * (yU+1),2))[0]) {
+                Q.put(Pair((xU) + w * (yU+1),2), listOf(distance, idU.first, toolU))
+            }
         } 
         if (Q.containsKey(Pair((xU) + w * (yU+1),0)) && yU < h-1) {
             var distance = distU
             var region = puzzleInput[(xU) + w * (yU+1)].toString().toInt()
-            var tool = 0
-            if (region == 1 || region == 2) {
+            if (toolU == 0) {
                 distance += 1
-                tool = toolU
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),0))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),0), listOf(distance, idU.first, 0))
-                }
-            } else if (region == 0) {
+            } else {
                 distance += 8
-                if (distance < Q.getValue(Pair((xU) + w * (yU+1),1))[0]) {
-                    Q.put(Pair((xU) + w * (yU+1),1), listOf(distance, idU.first, 1))
-                    Q.put(Pair((xU) + w * (yU+1),2), listOf(distance, idU.first, 2))
-                }
+            }
+            if (distance < Q.getValue(Pair((xU) + w * (yU+1),0))[0]) {
+                Q.put(Pair((xU) + w * (yU+1),0), listOf(distance, idU.first, toolU))
             } 
         } 
         
@@ -244,56 +191,38 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     if (Q.containsKey(Pair((xU-1) + w * (yU),1)) && xU >0) {
         var distance = distU
         var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
-        var tool = 0
-        if (region == 0 || region == 2) {
+        if (toolU == 1) {
             distance += 1
-            tool = toolU
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, 1))
-            }
-        } else if (region == 1) {
+        } else {
             distance += 8
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, 0))
-                Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, 2))
-            }
+        }
+        if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
+            Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, toolU))
         } 
     }         
     if (Q.containsKey(Pair((xU-1) + w * (yU),2)) && xU > 0) {
         var distance = distU
         var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
-        var tool = 0
-        if (region == 0 || region == 1) {
+        if (toolU == 2) {
             distance += 1
-            tool = toolU
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),2))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, 2))
-            }
-        } else if (region == 2) {
+        } else {
             distance += 8
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),2))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, 0))
-                Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, 1))
-            }
         } 
+        if (distance < Q.getValue(Pair((xU-1) + w * (yU),2))[0]) {
+            Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, toolU))
+        }
     } 
     if (Q.containsKey(Pair((xU-1) + w * (yU),0)) && xU >0) {
         var distance = distU
         var region = puzzleInput[(xU-1) + w * (yU)].toString().toInt()
-        var tool = 0
-        if (region == 1 || region == 2) {
+        if (toolU == 0) {
             distance += 1
-            tool = toolU
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),0))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, 0))
-            }
-        } else if (region == 0) {
+        } else {
             distance += 8
-            if (distance < Q.getValue(Pair((xU-1) + w * (yU),1))[0]) {
-                Q.put(Pair((xU-1) + w * (yU),1), listOf(distance, idU.first, 1))
-                Q.put(Pair((xU-1) + w * (yU),2), listOf(distance, idU.first, 2))
-            }
         } 
+        if (distance < Q.getValue(Pair((xU-1) + w * (yU),0))[0]) {
+            Q.put(Pair((xU-1) + w * (yU),0), listOf(distance, idU.first, toolU))
+        }
     } 
          
 
@@ -305,49 +234,23 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int, part
     }    
     
 
-    /* 
-    var printOut = puzzleInput
-    for ((key,value) in allNodes) {
-        printOut = printOut.replaceRange(key, key+1, "4")
-    }
     
-    
-    println("allNodes: $allNodes")
-    printOut.chunked(w).forEach {
-        it.forEach {
-            when(it) {
-                '0' -> print(".")
-                '1' -> print("=")
-                '2' -> print("|")
-                '4' -> print("x")
-            }
-        }
-        println()
-    }
-    */
-
-    /*
-    var currNode = endIndex
+     
+    var currNode = Pair(endIndex, t)
     var i = 0
     println(" for debugging: current path:")
-    while (currNode != 0) {
+    while (currNode != Pair(0,t)) {
         i+= 1
                 println("$currNode: ${allNodes.getValue(currNode)}")
-                currNode = allNodes.getValue(currNode)[1]  
+                currNode = Pair(allNodes.getValue(currNode)[1],allNodes.getValue(currNode)[2])    
         }
         println("$currNode: ${allNodes.getValue(currNode)}")
+    
+    
+    //println()
+    //println(allNodes)
 
-    */    
-
-    for(i in 0..2) {
-        if (allNodes.containsKey(Pair(endIndex, i))) {
-            print("Pair($endIndex, $i) :")
-            println(allNodes.getValue(Pair(endIndex, i)))
-        }
-    }
-    return -1
-
-    //return allNodes.getValue(Pair(endIndex,1))[0]
+    return allNodes.getValue(Pair(endIndex,1))[0]
 }
 
 fun main() {
@@ -419,4 +322,3 @@ fun main() {
     t1 = System.currentTimeMillis() - t1
 	println("puzzle solved in ${t1} ms")
 }
-
