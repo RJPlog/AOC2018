@@ -8,6 +8,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
     // 0: . = rocky  -> torch or climbing (12)
     // 1: = = wet	   -> climbing or nothing (20)
     // 2: |  = narrow -> torch or nothing (10)
+    val allowedTools = listOf("12", "20", "10")
       
     // initialize all necessary variables for Dijkstra
     var Q = mutableMapOf<Pair<Int,Int>,List<Int>>()  // id(location, tool) -> dist, previous, prevtool (0 = neither, 1 = torch, 2 = climbing gear)
@@ -59,17 +60,21 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
             if (xU +dx >= 0 && xU+dx <= w-1 && yU +dy >= 0 && yU+dy <= h-1) {
             // for each tool    
             (0..2).forEach {
-                    if (Q.containsKey(Pair((xU+dx) + w * (yU+dy),it))) {
-                        var distance = distU
-                        if (toolU == it) {
-                            distance += 1
-                        } else {
-                            distance += 8
+                var currRegion = puzzleInput[idU.first.toInt()].toString().toInt()
+                var nextRegion = puzzleInput[(xU+dx) + w * (yU+dy)].toString().toInt()
+                    if (allowedTools[currRegion].contains(it.toString()) && allowedTools[nextRegion].contains(it.toString())) {
+                        if (Q.containsKey(Pair((xU+dx) + w * (yU+dy),it))) {
+                            var distance = distU
+                            if (toolU == it) {
+                                distance += 1
+                            } else {
+                                distance += 8
+                            } 
+                            if (distance < Q.getValue(Pair((xU+dx) + w * (yU+dy),it))[0]) {
+                                Q.put(Pair((xU+dx) + w * (yU+dy),it), listOf(distance, idU.first, toolU))
+                            }
                         } 
-                        if (distance < Q.getValue(Pair((xU+dx) + w * (yU+dy),it))[0]) {
-                            Q.put(Pair((xU+dx) + w * (yU+dy),it), listOf(distance, idU.first, toolU))
-                        }
-                    } 
+                    }
                 }
             }
         }
@@ -78,6 +83,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
         
     // use this to determine path  / debugging:
     if (true) {
+        // grenerate / print used path
         var pathContent = mutableMapOf<Pair<Int,Int>,List<Int>>()
         var currNode = Pair(endIndex, t)
 
@@ -92,8 +98,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
             }
             println("$currNode: ${allNodes.getValue(currNode)}") 
 
-        println(pathContent.size)
-
+        // visualize path    
         for (y in 0..h-1) {
             for (x in 0..w-1) {
                 if (pathContent.containsKey(Pair(x + w*y, 0))) {
@@ -110,7 +115,6 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
         }
     }
     // use this to determine path  / debugging:
-
 
     return allNodes.getValue(Pair(endIndex,1))[0]
 }
@@ -168,7 +172,6 @@ fun main() {
             }
         }
     }
-    // pIELev[puzzleInput[1].split(",")[0].toInt() + w * puzzleInput[1].split(",")[1].toInt()] = 0
 
     var pIPart2 = (pIELev.map {(it % 3)}).joinToString("")
 
