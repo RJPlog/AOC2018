@@ -67,7 +67,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
                             distance += 8
                         } 
                         if (distance < Q.getValue(Pair((xU+dx) + w * (yU+dy),it))[0]) {
-                            Q.put(Pair((xU+dx) + w * (yU+dy),it), listOf(distance, idU.first, it))
+                            Q.put(Pair((xU+dx) + w * (yU+dy),it), listOf(distance, idU.first, toolU))
                         }
                     } 
                 }
@@ -77,7 +77,7 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
     }    
         
     // use this to determine path  / debugging:
-    if (false) {
+    if (true) {
         var pathContent = mutableMapOf<Pair<Int,Int>,List<Int>>()
         var currNode = Pair(endIndex, t)
 
@@ -97,13 +97,13 @@ fun maze(puzzleInput: String, w: Int, h: Int, start: Int, end: Int, t: Int): Int
         for (y in 0..h-1) {
             for (x in 0..w-1) {
                 if (pathContent.containsKey(Pair(x + w*y, 0))) {
-                    print("N,")
+                    print("N")
                 } else if (pathContent.containsKey(Pair(x + w*y, 1))) {
-                    print("T,")
+                    print("T")
                 } else if (pathContent.containsKey(Pair(x + w*y, 2))) {
-                    print("C,")
+                    print("C")
                 } else {
-                    print("${puzzleInput[x + w*y]},")
+                    print(".")
                 }
             }
             println()
